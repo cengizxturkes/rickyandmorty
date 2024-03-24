@@ -76,7 +76,7 @@ const FavoritesScreen: React.FC = () => {
         <View style={styles.container}>
             {favorites.length === 0 ? (
                 <View>
-                    <Text style={styles.noFavorites}>Favori Yok Bölüm Kısmından Yeni Favori Ekleyebilirsiniz.</Text>
+                    <Text style={styles.noFavorites}>There is no Favorities Character</Text>
                     <LottieView
                         source={require("../../assets/nofile.json")}
                         autoPlay
