@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Button, ActivityIndicator, StyleSheet, TextInput, ScrollView } from 'react-native';
 import EpisodeRepository from '../repositories/EpisodeRepository';
-import { Appbar } from 'react-native-paper';
-import {NavigationContainer} from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity } from 'react-native';
+import LottieView from 'lottie-react-native';
+
+interface Episode {
+    name: string;
+    episode: string;
+    air_date: string;
+    characters: string[];
+}
 
 const EPISODES_PER_PAGE = 10;
 
 const HomeView: React.FC = () => {
-    const [episodes, setEpisodes] = useState([]);
+    const [episodes, setEpisodes] = useState<Episode[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+    const navigation = useNavigation();
 
     useEffect(() => {
         fetchData();
@@ -42,48 +51,70 @@ const HomeView: React.FC = () => {
             setCurrentPage(currentPage - 1);
         }
     };
-    const Stack = createNativeStackNavigator();
+
+    const handleNavigateToNewCharacter = (characterUrls: string[]) => {
+        navigation.navigate('Character', { characterUrls });
+    };
+
+    const filteredEpisodes = episodes.filter(episode =>
+        episode.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
-        <NavigationContainer>
-<Stack.Navigator>
-    
-        <View style={styles.container}>
-            {loading ? (
-                <ActivityIndicator />
-            ) : (
-                <>
-                    <View style={styles.episodesContainer}>
-                        {episodes
-                            .slice((currentPage - 1) * EPISODES_PER_PAGE, currentPage * EPISODES_PER_PAGE)
-                            .map((episode: any) => (
-                                <View style={styles.episodeBox}>
-                                    <Text style={styles.episodeName}>{episode.name}</Text>
-                                    <Text style={styles.episode}> - {episode.episode}</Text>
-                                    <Text style={styles.air_date}>{episode.air_date}</Text>
-                                </View>
-                            ))}
-                    </View>
-                    
-                    <View style={styles.paginationContainer}>
-                        <View style={{ flex: 1 }}>
-                            <Button title="Önceki Sayfa" onPress={handlePrevPage} disabled={currentPage === 1} />
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <View style={styles.container}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search episodes..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                {loading ? (
+                    <ActivityIndicator />
+                ) : (
+                    <>
+                        <View style={styles.episodesContainer}>
+                            {filteredEpisodes
+                                .slice((currentPage - 1) * EPISODES_PER_PAGE, currentPage * EPISODES_PER_PAGE)
+                                .map((episode: Episode, index: number) => (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={styles.episodeBox}
+                                        onPress={() => handleNavigateToNewCharacter(episode.characters)}
+                                    >
+                                        <Text style={styles.episodeName}>{episode.name}</Text>
+                                        <Text style={styles.episode}> - {episode.episode}</Text>
+                                        <Text style={styles.air_date}>{episode.air_date}</Text>
+                                    </TouchableOpacity>
+                                ))}
                         </View>
-                        <View style={{ flex: 1, alignItems: 'center' }}>
-                            <Text style={styles.pageInfo}>Sayfa {currentPage} / {totalPages}</Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Button title="Sonraki Sayfa" onPress={handleNextPage} disabled={currentPage === totalPages} />
-                        </View>
-                    </View>
-                </>
-            )}
-        </View>
-        </Stack.Navigator>
-        </NavigationContainer>
 
+                        <View style={styles.paginationContainer}>
+                            <View style={{ flex: 1 }}>
+                                <Button
+                                    title="Önceki Sayfa"
+                                    onPress={handlePrevPage}
+                                    disabled={currentPage === 1}
+                                />
+                            </View>
+                            <View style={{ flex: 1, alignItems: 'center' }}>
+                                <Text style={styles.pageInfo}>Sayfa {currentPage} / {totalPages}</Text>
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Button
+                                    title="Sonraki Sayfa"
+                                    onPress={handleNextPage}
+                                    disabled={currentPage === totalPages}
+                                />
+                            </View>
+                        </View>
+                    </>
+                )}
+            </View>
+        </ScrollView>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -98,10 +129,14 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
     },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
+    searchInput: {
+        width: '90%',
+        height: 40,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 20,
     },
     episodesContainer: {
         flexDirection: 'row',
@@ -109,7 +144,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     episodeBox: {
-        width: "100%",
+        width: '100%',
         height: 100,
         backgroundColor: '#e0e0e0',
         margin: 10,
@@ -124,7 +159,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontFamily: 'Gilroy-Bold',
         textAlign: 'center',
-
     },
     episode: {
         fontSize: 16,
@@ -136,7 +170,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 5,
         right: 10,
-
     },
     paginationContainer: {
         flexDirection: 'row',
@@ -152,6 +185,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    scrollViewContent: {
+        flexGrow: 1,
     },
 });
 

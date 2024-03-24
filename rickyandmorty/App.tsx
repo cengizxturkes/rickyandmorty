@@ -4,9 +4,16 @@
  *
  * @format
  */
+import { NavigationContainer } from '@react-navigation/native';
+import store from './store'; // Redux mağazanızın yolu
+import LottieView from 'lottie-react-native';
 
 import React from 'react';
 import type {PropsWithChildren} from 'react';
+import Character from './src/pages/Character';
+import CharacterDetail from './src/pages/CharacterDetail';
+import AppTabs from './src/pages/AppTabs';
+
 import {
   SafeAreaView,
   ScrollView,
@@ -25,36 +32,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import HomeView from './src/pages/Home';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Provider } from 'react-redux';
+const Stack = createNativeStackNavigator();
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -64,17 +44,19 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <HomeView/>
-      </ScrollView>
-    </SafeAreaView>
+    <Provider store={store}>
+
+    <NavigationContainer>
+
+      <Stack.Navigator>
+        <Stack.Screen name="Ricky and Morty" component={AppTabs} />
+        <Stack.Screen name="Character" component={Character} />
+  
+        <Stack.Screen name="CharacterDetail" component={CharacterDetail} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    </Provider>
+
   );
 }
 
