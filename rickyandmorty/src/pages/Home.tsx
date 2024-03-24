@@ -24,13 +24,16 @@ const HomeView: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, [currentPage]);
+    }, [currentPage, searchQuery]);
 
     const fetchData = async () => {
         try {
             const results = await EpisodeRepository.getEpisodes();
             setEpisodes(results);
-            const totalEpisodes = results.length;
+            const filteredResults = results.filter(episode =>
+                episode.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            const totalEpisodes = filteredResults.length;
             const totalPages = Math.ceil(totalEpisodes / EPISODES_PER_PAGE);
             setTotalPages(totalPages);
             setLoading(false);
@@ -62,7 +65,7 @@ const HomeView: React.FC = () => {
 
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            <View style={styles.container}>
+            <View>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search episodes..."
@@ -73,7 +76,7 @@ const HomeView: React.FC = () => {
                     <ActivityIndicator />
                 ) : (
                     <>
-                        <View style={styles.episodesContainer}>
+                        <View style={styles.container}>
                             {filteredEpisodes
                                 .slice((currentPage - 1) * EPISODES_PER_PAGE, currentPage * EPISODES_PER_PAGE)
                                 .map((episode: Episode, index: number) => (
@@ -89,25 +92,27 @@ const HomeView: React.FC = () => {
                                 ))}
                         </View>
 
-                        <View style={styles.paginationContainer}>
-                            <View style={{ flex: 1 }}>
-                                <Button
-                                    title="Önceki Sayfa"
-                                    onPress={handlePrevPage}
-                                    disabled={currentPage === 1}
-                                />
+                        {totalPages > 1 && (
+                            <View style={styles.paginationContainer}>
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        title="Previous Page"
+                                        onPress={handlePrevPage}
+                                        disabled={currentPage === 1}
+                                    />
+                                </View>
+                                <View style={{ flex: 1, alignItems: 'center' }}>
+                                    <Text style={styles.pageInfo}>Page {currentPage} / {totalPages}</Text>
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        title="Next Page"
+                                        onPress={handleNextPage}
+                                        disabled={currentPage === totalPages}
+                                    />
+                                </View>
                             </View>
-                            <View style={{ flex: 1, alignItems: 'center' }}>
-                                <Text style={styles.pageInfo}>Sayfa {currentPage} / {totalPages}</Text>
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Button
-                                    title="Sonraki Sayfa"
-                                    onPress={handleNextPage}
-                                    disabled={currentPage === totalPages}
-                                />
-                            </View>
-                        </View>
+                        )}
                     </>
                 )}
             </View>
@@ -137,11 +142,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         marginBottom: 20,
-    },
-    episodesContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
+        marginLeft: 20,
+        marginRight:20,
+        marginTop:20
     },
     episodeBox: {
         width: '100%',

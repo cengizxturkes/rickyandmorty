@@ -8,11 +8,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import store from './store'; // Redux mağazanızın yolu
 import LottieView from 'lottie-react-native';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
 import Character from './src/pages/Character';
 import CharacterDetail from './src/pages/CharacterDetail';
 import AppTabs from './src/pages/AppTabs';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 import {
   SafeAreaView,
@@ -41,6 +42,32 @@ function App(): React.JSX.Element {
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
+  PushNotificationIOS.requestPermissions().then(() => {
+    PushNotificationIOS.presentLocalNotification({
+      alertBody: 'test',
+    });
+
+  });
+  
+  useEffect(() => {
+    const type = 'notification';
+    PushNotificationIOS.addEventListener(type, onRemoteNotification);
+    return () => {
+      PushNotificationIOS.removeEventListener(type);
+    };
+  });
+  const onRemoteNotification = (notification:any) => {
+    const isClicked = notification.getData().userInteraction === 1;
+
+    if (isClicked) {
+      // Navigate user to another screen
+    } else {
+      // Do something else with push notification
+    }
+    // Use the appropriate result based on what you needed to do for this notification
+    const result = PushNotificationIOS.FetchResult.NoData;
+    notification.finish(result);
   };
 
   return (

@@ -42,15 +42,15 @@ const FavoritesScreen: React.FC = () => {
 
     const removeFromFavorites = async (character: any) => {
         Alert.alert(
-            'Favorilerden Silme',
-            `Bu Karakteri=> ${character.name} Favorilerden Silmek İstediğinize Emin Misiniz?`,
+            'Delete ',
+            `Are you sure you want to delete ${character.name} from favorites?`,
             [
                 {
-                    text: 'Geri',
+                    text: 'Back',
                     style: 'cancel',
                 },
                 {
-                    text: 'Evet',
+                    text: 'Yes',
                     style: 'destructive',
                     onPress: async () => {
                         const updatedFavorites = favorites.filter((fav: any) => fav.id !== character.id);
@@ -69,7 +69,7 @@ const FavoritesScreen: React.FC = () => {
         const filteredFavorites = favorites.filter((character) =>
             character.name.toLowerCase().includes(query.toLowerCase())
         );
-        console.log('Filtered Favorites:', filteredFavorites); // Filtrelenmiş favori karakterleri konsola yazdır
+        console.log('Filtered Favorites:', filteredFavorites); 
         setFilteredFavorites(filteredFavorites);
     };
     return (
@@ -101,7 +101,7 @@ const FavoritesScreen: React.FC = () => {
                                 <Text style={styles.characterName}>{character.name}</Text>
                 
                                 <Icon
-                                    name="star"
+                                    name="heart"
                                     size={20}
                                     color="red"
                                     style={{ marginLeft: 'auto' }}  

@@ -3,6 +3,7 @@ import { Text, View, Image, StyleSheet, ScrollView, Dimensions, TextInput, Keybo
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 const Character: React.FC<{ route: { params: { characterUrls: string[] } } }> = ({ route }) => {
     const { characterUrls } = route.params;
@@ -25,7 +26,7 @@ const Character: React.FC<{ route: { params: { characterUrls: string[] } } }> = 
 
         fetchCharacterData();
     }, [characterUrls]);
-
+    
     const truncateName = (name: string) => {
         return name.length > 10 ? name.substring(0, 100) + '...' : name;
     };
@@ -47,16 +48,20 @@ const Character: React.FC<{ route: { params: { characterUrls: string[] } } }> = 
         navigation.navigate('CharacterDetail', { character });
     };
 
-    // Pagination Logic
     const charactersPerPage = 10;
     const indexOfLastCharacter = currentPage * charactersPerPage;
     const indexOfFirstCharacter = indexOfLastCharacter - charactersPerPage;
-    const currentCharacters = characterData.slice(indexOfFirstCharacter, indexOfLastCharacter);
+
+    const filteredCharacters = characterData.filter(character =>
+        character.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const currentCharacters = filteredCharacters.slice(indexOfFirstCharacter, indexOfLastCharacter);
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={styles.container}>
+                <View >
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search characters..."
@@ -78,26 +83,29 @@ const Character: React.FC<{ route: { params: { characterUrls: string[] } } }> = 
                             </TouchableOpacity>
                         ))}
                     </View>
-                    {/* Pagination Controls */}
-                    <View style={styles.paginationContainer}>
-                        <TouchableOpacity
-                            onPress={() => setCurrentPage(prevPage => Math.max(prevPage - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            <Text style={[styles.paginationButton, currentPage === 1 && styles.disabledButton]}>Previous</Text>
-                        </TouchableOpacity>
-                        <Text>{currentPage}/{Math.ceil(characterData.length / charactersPerPage)}</Text>
-                        <TouchableOpacity
-                            onPress={() => setCurrentPage(prevPage => Math.min(prevPage + 1, Math.ceil(characterData.length / charactersPerPage)))}
-                            disabled={indexOfLastCharacter >= characterData.length}
-                        >
-                            <Text style={[styles.paginationButton, indexOfLastCharacter >= characterData.length && styles.disabledButton]}>Next</Text>
-                        </TouchableOpacity>
-                    </View>
+                    
+                    {filteredCharacters.length > charactersPerPage && (
+                        <View style={styles.paginationContainer}>
+                            <TouchableOpacity
+                                onPress={() => setCurrentPage(prevPage => Math.max(prevPage - 1, 1))}
+                                disabled={currentPage === 1 || indexOfFirstCharacter === 0}
+                            >
+                                <Text style={[styles.paginationButton, (currentPage === 1 || indexOfFirstCharacter === 0) && styles.disabledButton]}>Previous</Text>
+                            </TouchableOpacity>
+                            <Text>{currentPage}/{Math.ceil(filteredCharacters.length / charactersPerPage)}</Text>
+                            <TouchableOpacity
+                                onPress={() => setCurrentPage(prevPage => Math.min(prevPage + 1, Math.ceil(filteredCharacters.length / charactersPerPage)))}
+                                disabled={indexOfLastCharacter >= filteredCharacters.length}
+                            >
+                                <Text style={[styles.paginationButton, indexOfLastCharacter >= filteredCharacters.length && styles.disabledButton]}>Next</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
+    
 };
 
 const styles = StyleSheet.create({
@@ -115,7 +123,10 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         marginBottom: 20,
-    },
+        marginLeft: 20,
+        marginRight:20,
+        marginTop:20,
+        },
     rowContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',

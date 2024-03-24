@@ -9,7 +9,7 @@ const AppTabs = () => {
     return (
         <Tab.Navigator>
             <Tab.Screen
-                name="Ana Sayfa"
+                name="Home Page"
                 component={HomeView}
                 options={{
                     tabBarIcon: ({ color, size }) => (
@@ -18,7 +18,7 @@ const AppTabs = () => {
                 }}
             />
             <Tab.Screen
-                name="Favoriler"
+                name="Favorities"
                 component={FavoritesScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => (
