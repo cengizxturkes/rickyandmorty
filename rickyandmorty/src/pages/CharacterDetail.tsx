@@ -5,7 +5,7 @@ import { addToFavorites, removeFromFavorites } from '../redux/favoritesSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Icon } from '@rneui/themed';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-
+import  styles  from './styles/CharacterDetailStyles.js';
 const CharacterDetail: React.FC<{ route: { params: { character: any } } }> = ({ route }) => {
     const { character } = route.params;
     const [isFavorite, setIsFavorite] = useState(false);
@@ -105,46 +105,5 @@ const CharacterDetail: React.FC<{ route: { params: { character: any } } }> = ({ 
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        alignItems: 'center',
-        paddingVertical: 20,
-    },
-    imageContainer: {
-        position: 'relative',
-        alignItems: 'center',
-    },
-    characterImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        marginBottom: 20,
-    },
-    favoriteButton: {
-        position: 'absolute',
-        top: 0,
-        right: -50,
-        zIndex: 1,
-    },
-    characterName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    detailContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    detailLabel: {
-        fontWeight: 'bold',
-        marginRight: 10,
-    },
-    detailValue: {
-        fontSize: 16,
-    },
-});
 
 export default CharacterDetail;
